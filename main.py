@@ -1,3 +1,4 @@
+import os
 import socket
 import sys
 
@@ -10,6 +11,7 @@ class MainWindow(QWidget):
 
         self.sock = None
         self.address = None
+        self.flag = True
         self.setWindowTitle("VideoBenchmark Client")
         self.resize(400, 300)
 
@@ -20,6 +22,7 @@ class MainWindow(QWidget):
         self.textEdit.setReadOnly(True)
         self.btn1 = QPushButton("Connect")
         self.btn2 = QPushButton("Disconnect")
+        self.btn2.setDisabled(True)
 
         layout = QVBoxLayout()
         layout.addWidget(self.textEdit)
@@ -39,15 +42,25 @@ class MainWindow(QWidget):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             self.sock.connect(self.address)
-
+            self.btn2.setDisabled(False)
             self.textEdit.append("Connected!\n")
+            # TODO: start loop to get data from server
+            # while self.flag:
+            #     self.run_data()
         except ConnectionError:
             self.textEdit.append("Error!\n")
 
     def btn2_clicked(self):
+        self.flag = False
         self.sock.shutdown(socket.SHUT_RDWR)
         self.sock.close()
         self.textEdit.append("Closed!\n")
+        self.btn2.setDisabled(True)
+
+    def run_data(self):
+        self.sock.sendall(bytes("getdata\n", "utf-8"))
+        data = str(self.sock.recv(1024), "utf-8")
+        self.textEdit.append(data)
 
 
 if __name__ == '__main__':
