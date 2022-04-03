@@ -1,5 +1,7 @@
 import socket
 import sys
+
+from PyQt5.QtChart import QChartView, QChart, QLineSeries
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication, QPushButton, QVBoxLayout, QTextEdit, QWidget, QLineEdit
 
@@ -9,8 +11,9 @@ class MainWindow(QWidget):
         super().__init__(parent)
 
         self.address = None
+        self.curr_data = None
         self.setWindowTitle("VideoBenchmark Client")
-        self.resize(400, 300)
+        self.resize(800, 600)
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.getsomedata)
@@ -18,14 +21,22 @@ class MainWindow(QWidget):
         self.socket_data = QLineEdit()
         self.socket_data.setText("127.0.0.1:5000")
         self.textEdit.setReadOnly(True)
+
         self.btn1 = QPushButton("Connect")
         self.btn2 = QPushButton("Stop")
+        self.fpschart = QChart()
+        self.fpschart.legend().hide()
+        self.fpschart.createDefaultAxes()
+        self.fpschart.setTitle("FPS")
+        self.fpschartview = QChartView(self.fpschart)
+        self.btn2.setDisabled(True)
 
         layout = QVBoxLayout()
         layout.addWidget(self.textEdit)
         layout.addWidget(self.btn1)
         layout.addWidget(self.btn2)
         layout.addWidget(self.socket_data)
+        layout.addWidget(self.fpschartview)
         self.setLayout(layout)
 
         self.btn1.clicked.connect(self.btn1_clicked)
@@ -33,9 +44,13 @@ class MainWindow(QWidget):
 
     def btn1_clicked(self):
         self.timer.start(1000)
+        self.btn1.setDisabled(True)
+        self.btn2.setDisabled(False)
 
     def btn2_clicked(self):
         self.timer.stop()
+        self.btn1.setDisabled(False)
+        self.btn2.setDisabled(True)
 
     def getsomedata(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -45,6 +60,7 @@ class MainWindow(QWidget):
         sock.connect(self.address)
         sock.sendall(bytes("getdata\n", "utf-8"))
         data = str(sock.recv(1024), "utf-8")
+        self.curr_data = data
         self.textEdit.append(data)
 
 
