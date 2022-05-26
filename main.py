@@ -28,7 +28,7 @@ class MainWindow(QWidget):
         self.pgfpsplot = pg.PlotWidget()
         self.pgbrplot = pg.PlotWidget()
         self.btn1 = QPushButton("Connect")
-        self.btn2 = QPushButton("Stop")
+        self.btn2 = QPushButton("Disconnect")
         self.socket_data.setText("127.0.0.1:5000")
         self.textEdit.setReadOnly(True)
         self.btn2.setDisabled(True)
@@ -48,8 +48,8 @@ class MainWindow(QWidget):
         self.drawtimer.timeout.connect(self.drawsomedata)
 
     def btn1_clicked(self):
-        self.datatimer.start(1000)
-        self.drawtimer.start(1001)
+        self.datatimer.start(500)
+        self.drawtimer.start(501)
         self.btn1.setDisabled(True)
         self.btn2.setDisabled(False)
 
